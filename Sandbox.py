@@ -5,7 +5,7 @@ from pygame.locals import *
 
 stoneImg = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
 transStone = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
-transStone.set_alpha(100)
+transStone.set_alpha(150)
 airImg = pygame.transform.scale(pygame.image.load('grid.png'), (50, 50))
 
 background = pygame.image.load('bg.png')
@@ -86,12 +86,16 @@ while True:
     frameTime = mainClock.tick(1000)
     FPS = mainClock.get_fps()
     currentTime = pygame.time.get_ticks()
-    mousePosition = pygame.mouse.get_pos()
+    mousePos = pygame.mouse.get_pos()
 
     # -------- Code outside Gamestate --------
     windowSurface.blit(background, (0, 0))
     
     # -------- Gameplay --------
+
+    windowSurface.blit(transStone, (mousePos[0] - (mousePos[0] % 50), mousePos[1] - (mousePos[1] % 50)))
+
+    
     for y in range(0,14):
         for x in range(0,26):
             try:
