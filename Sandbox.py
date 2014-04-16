@@ -6,6 +6,8 @@ from pygame.locals import *
 stoneImg = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
 airImg = pygame.transform.scale(pygame.image.load('grid.png'), (50, 50))
 
+background = pygame.image.load('bg.png')
+
 # -------- Classes and Functions --------
 
 def restart():
@@ -85,7 +87,7 @@ while True:
     mousePosition = pygame.mouse.get_pos()
 
     # -------- Code outside Gamestate --------
-    windowSurface.fill(BLACK)
+    windowSurface.blit(background, (0, 0))
     
     # -------- GameStates --------
 
