@@ -4,6 +4,8 @@ from pygame.locals import *
 # -------- Image and music Loading --------
 
 stoneImg = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
+transStone = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
+transStone.set_alpha(100)
 airImg = pygame.transform.scale(pygame.image.load('grid.png'), (50, 50))
 
 background = pygame.image.load('bg.png')
@@ -20,9 +22,9 @@ def distance(speed, time):
 def generateWorld():
     for y in range(0,14):
         for x in range(0,26):
-            if y >= 7:
+            if y >= 10:
                 world[y][x] = Stone([x, y], 0)
-            elif y <= 6:
+            elif y < 10:
                 world[y][x] = Air([x, y], 0)
 
 class Block(object):
@@ -89,8 +91,7 @@ while True:
     # -------- Code outside Gamestate --------
     windowSurface.blit(background, (0, 0))
     
-    # -------- GameStates --------
-
+    # -------- Gameplay --------
     for y in range(0,14):
         for x in range(0,26):
             try:
@@ -112,16 +113,3 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-    
-
-
-playerImage = pygame.image.load('Player_ship.png')
-playerStretchedImage = pygame.transform.scale(playerImage, (PLAYERWIDTH * 4, PLAYERHEIGHT * 4))
-
-laserSound = pygame.mixer.Sound('shot.wav')
-
-windowBackground.blit(background, (0, 0, 100, 100))
-
-pygame.mixer.music.load("Launchpad.mp3")
-pygame.mixer.music.play(-1, 0.0)
-
