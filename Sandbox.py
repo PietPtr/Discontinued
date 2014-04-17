@@ -27,22 +27,38 @@ def generateWorld():
             elif y < 10:
                 world[y][x] = Air([x, y], 0)
 
+def checkCollision(tile):
+    pygame.draw.rect(windowSurface, RED, tile.rect, 1)
+    if world[tile.position[1]][tile.position[0]].type != "Air":
+        pygame.draw.rect(windowSurface, BLUE, tile.rect, 1)
+
 class Block(object):
+    global frameTime
     def __init__(self, position, speed, texture):
         self.position = position    # X * 50 = displayX, Y * 50  = displayY
         self.speed = speed
+        self.rect = pygame.Rect(position[0] * 50, position[1] * 50, 50, 50)
+        if self.speed == 0:
+            self.locked = True
+        elif self.speed != 0:
+            self.locked = False
     def render(self):
         windowSurface.blit(self.texture, (self.position[0] * 50, self.position[1] * 50))
+        if self.locked == False:
+            #self.position[1] = self.position[1] + 0.01
+            pass
 
 class Stone(Block):
     def __init__(self, position, speed):
         self.texture = stoneImg
         Block.__init__(self, position, speed, self.texture)
+        self.type = "Stone"
     
 class Air(Block): #or grid
     def __init__(self, position, speed):
         self.texture = airImg
         Block.__init__(self, position, speed, self.texture)
+        self.type = "Air"
 
 
 # -------- Constants --------
@@ -68,7 +84,10 @@ mainClock = pygame.time.Clock()
 
 # -------- Other variables --------
 
+mousePosition = [0,0]
+
 showDebug = True
+clicked = False
 
 world = []
 
@@ -87,6 +106,8 @@ while True:
     FPS = mainClock.get_fps()
     currentTime = pygame.time.get_ticks()
     mousePos = pygame.mouse.get_pos()
+    mousePosition[0] = (mousePos[0] - (mousePos[0] % 50)) / 50
+    mousePosition[1] = (mousePos[1] - (mousePos[1] % 50)) / 50
 
     # -------- Code outside Gamestate --------
     windowSurface.blit(background, (0, 0))
@@ -95,13 +116,17 @@ while True:
 
     windowSurface.blit(transStone, (mousePos[0] - (mousePos[0] % 50), mousePos[1] - (mousePos[1] % 50)))
 
+    if clicked == True:
+        world[mousePosition[1]][mousePosition[0]] = Stone([mousePosition[0], mousePosition[1]], 0.1)
     
     for y in range(0,14):
         for x in range(0,26):
             try:
                 world[y][x].render()
             except AttributeError:
-                print AttributeError
+                print "AttributeError"
+
+            checkCollision(world[y][x])
     
     # -------- Debugging --------
     if showDebug == True:
@@ -112,6 +137,10 @@ while True:
     # -------- Events --------
     pygame.display.update()
     for event in pygame.event.get():
+        if event.type == MOUSEBUTTONUP:
+            clicked = True
+        elif event.type != MOUSEBUTTONUP:
+            clicked = False
         if event.type == KEYUP and event.key == 284:
             showDebug = not showDebug
         if event.type == QUIT:
