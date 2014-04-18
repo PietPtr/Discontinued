@@ -29,8 +29,21 @@ def generateWorld():
 
 def checkCollision(tile):
     pygame.draw.rect(windowSurface, RED, tile.rect, 1)
-    if world[tile.position[1]][tile.position[0]].type != "Air":
-        pygame.draw.rect(windowSurface, BLUE, tile.rect, 1)
+    try:
+        if world[tile.position[1] + 1][tile.position[0]].type != "Air" and tile.type == "Stone": 
+            tile.locked = True
+    except:
+        pass
+    try:
+        if world[tile.position[1]][tile.position[0] + 1].type != "Air" and tile.type == "Stone": 
+            tile.locked = True
+    except:
+        pass
+    if world[tile.position[1]][tile.position[0] - 1].type != "Air" and tile.type == "Stone" and tile.position[0] - 1 >= 0:
+        tile.locked = True
+    if world[tile.position[1] - 1][tile.position[0]].type != "Air" and tile.type == "Stone" and tile.position[0] - 1 >= 0:
+        tile.locked = True
+
 
 class Block(object):
     global frameTime
@@ -38,15 +51,10 @@ class Block(object):
         self.position = position    # X * 50 = displayX, Y * 50  = displayY
         self.speed = speed
         self.rect = pygame.Rect(position[0] * 50, position[1] * 50, 50, 50)
-        if self.speed == 0:
-            self.locked = True
-        elif self.speed != 0:
-            self.locked = False
+        self.locked = False
     def render(self):
         windowSurface.blit(self.texture, (self.position[0] * 50, self.position[1] * 50))
-        if self.locked == False:
-            #self.position[1] = self.position[1] + 0.01
-            pass
+        
 
 class Stone(Block):
     def __init__(self, position, speed):
