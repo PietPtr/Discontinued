@@ -1,9 +1,10 @@
-import pygame, sys
+import pygame, sys, time, random
 from pygame.locals import *
 
 # -------- Image and music Loading --------
 
 stoneImg = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
+stoneeImg = pygame.transform.scale(pygame.image.load('stonee.png'), (50, 50))
 transStone = pygame.transform.scale(pygame.image.load('stone.png'), (50, 50))
 transStone.set_alpha(150)
 airImg = pygame.transform.scale(pygame.image.load('grid.png'), (50, 50))
@@ -22,28 +23,48 @@ def distance(speed, time):
 def generateWorld():
     for y in range(0,14):
         for x in range(0,26):
+            #"""
             if y >= 10:
                 world[y][x] = Stone([x, y], 0)
             elif y < 10:
                 world[y][x] = Air([x, y], 0)
+            """
+            if random.randint(0,1) == 0:
+                world[y][x] = Stone([x, y], 0)
+            else:
+                world[y][x] = Air([x, y], 0)
+            """
+            
 
 def checkCollision(tile):
+    locked = False
     pygame.draw.rect(windowSurface, RED, tile.rect, 1)
     try:
-        if world[tile.position[1] + 1][tile.position[0]].type != "Air" and tile.type == "Stone": 
-            tile.locked = True
+        if world[tile.position[1] + 1][tile.position[0]].type != "Air": #Down
+            print "True1"
+            locked = True
     except:
-        pass
+        print "OutOfRange@1"
     try:
-        if world[tile.position[1]][tile.position[0] + 1].type != "Air" and tile.type == "Stone": 
-            tile.locked = True
+        if world[tile.position[1]][tile.position[0] + 1].type != "Air": #Right
+            print "True2"
+            locked = True
     except:
-        pass
-    if world[tile.position[1]][tile.position[0] - 1].type != "Air" and tile.type == "Stone" and tile.position[0] - 1 >= 0:
-        tile.locked = True
-    if world[tile.position[1] - 1][tile.position[0]].type != "Air" and tile.type == "Stone" and tile.position[0] - 1 >= 0:
-        tile.locked = True
+        print "OutOfRange@2"
+    if world[tile.position[1]][tile.position[0] - 1].type != "Air" and tile.position[0] - 1 >= 0: #Left
+        print "True3"
+        locked = True
+    if world[tile.position[1] - 1][tile.position[0]].type != "Air" and tile.position[1] - 1 >= 0: #Up
+        print "True4"
+        locked = True
+    if locked == False:
+        world[tile.position[1]][tile.position[0]] = Air([tile.position[0], tile.position[1]], 0)
+        entityList.append(Entity([tile.position[0] * 50, tile.position[1] * 50], stoneeImg, [0, 0.1]))
+    elif locked == True:
+        world[mousePosition[1]][mousePosition[0]] = Stone([mousePosition[0], mousePosition[1]], 0.1)
 
+def turnIntoEntity(tile):
+    pass    
 
 class Block(object):
     global frameTime
@@ -68,6 +89,15 @@ class Air(Block): #or grid
         Block.__init__(self, position, speed, self.texture)
         self.type = "Air"
 
+class Entity(object):
+    def __init__(self, position, texture, movement):
+        self.position = position    # Real on screen position
+        self.texture =  texture
+        self.movement = movement
+    def render(self):
+        windowSurface.blit(self.texture, (self.position[0], self.position[1]))
+        self.position[0] = self.position[0] + self.movement[0]
+        self.position[1] = self.position[1] + self.movement[1]
 
 # -------- Constants --------
 
@@ -99,12 +129,13 @@ clicked = False
 
 world = []
 
+entityList = []
+
+# -------- Objects --------
 for i in range(0, WINDOWHEIGHT / 50):
     world.append([None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None])
 
 generateWorld()
-
-# -------- Objects --------
 
 loopTrack = 0
 while True:
@@ -125,7 +156,8 @@ while True:
     windowSurface.blit(transStone, (mousePos[0] - (mousePos[0] % 50), mousePos[1] - (mousePos[1] % 50)))
 
     if clicked == True:
-        world[mousePosition[1]][mousePosition[0]] = Stone([mousePosition[0], mousePosition[1]], 0.1)
+        #world[mousePosition[1]][mousePosition[0]] = Stone([mousePosition[0], mousePosition[1]], 0.1)
+        checkCollision(world[mousePosition[1]][mousePosition[0]])
     
     for y in range(0,14):
         for x in range(0,26):
@@ -134,7 +166,10 @@ while True:
             except AttributeError:
                 print "AttributeError"
 
-            checkCollision(world[y][x])
+            
+
+    for entity in entityList:
+        entity.render()
     
     # -------- Debugging --------
     if showDebug == True:
@@ -145,7 +180,7 @@ while True:
     # -------- Events --------
     pygame.display.update()
     for event in pygame.event.get():
-        if event.type == MOUSEBUTTONUP:
+        if event.type == MOUSEBUTTONDOWN:
             clicked = True
         elif event.type != MOUSEBUTTONUP:
             clicked = False
